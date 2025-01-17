@@ -51,7 +51,7 @@ function initThreeJS() {
 
     // Create a camera
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 5;
+    camera.position.z = 5; // Move the camera back to view the scene
 
     // Create a renderer
     renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -59,10 +59,17 @@ function initThreeJS() {
     document.body.appendChild(renderer.domElement);
 
     // Create a 3D object to highlight the hand
-    const geometry = new THREE.SphereGeometry(0.1, 32, 32); // Small sphere
+    const geometry = new THREE.SphereGeometry(0.2, 32, 32); // Larger sphere
     const material = new THREE.MeshBasicMaterial({ color: 0xff00ff, wireframe: false });
     handObject = new THREE.Mesh(geometry, material);
     scene.add(handObject);
+
+    // Add lighting (optional, if using materials that require light)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0xffffff, 1);
+    pointLight.position.set(5, 5, 5);
+    scene.add(pointLight);
 }
 
 // Function to detect hand gestures
@@ -107,8 +114,8 @@ function highlightHandIn3D(landmarks) {
     const palmBase = landmarks[0]; // Palm base landmark
 
     // Map hand position to 3D object position
-    const x = (palmBase[0] / canvas.width) * 4 - 2; // Map X coordinate
-    const y = -(palmBase[1] / canvas.height) * 4 + 2; // Map Y coordinate
+    const x = (palmBase[0] / canvas.width) * 10 - 5; // Map X coordinate
+    const y = -(palmBase[1] / canvas.height) * 10 + 5; // Map Y coordinate
 
     // Update 3D object position
     handObject.position.x = x;
