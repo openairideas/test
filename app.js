@@ -2,7 +2,23 @@ import * as tf from 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs';
 import * as handpose from 'https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose';
 import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
 
-let model, video, canvas, ctx;
+let model, video;
+let sphere;
+
+// Initialize Three.js scene
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+camera.position.z = 5;
+
+// Create a sphere to represent the index finger tip
+const geometry = new THREE.SphereGeometry(0.05, 32, 32);
+const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+sphere = new THREE.Mesh(geometry, material);
+scene.add(sphere);
 
 async function setupCamera() {
     video = document.getElementById('video');
@@ -27,42 +43,29 @@ async function loadModel() {
 async function predictWebcam() {
     while (true) {
         if (video.readyState === 4) {
-            await model.estimateHands(video).then(predictions => {
-                if (predictions.length > 0) {
-                    const hand = predictions[0];
-                    const landmarks = hand.landmarks;
-                    update3DEffect(landmarks);
-                }
-            });
+            const predictions = await model.estimateHands(video);
+            if (predictions.length > 0) {
+                const hand = predictions[0];
+                const landmarks = hand.landmarks;
+                update3DEffect(landmarks);
+            }
         }
         await tf.nextFrame();
     }
 }
 
 function update3DEffect(landmarks) {
-    // Example: Create a 3D sphere at the tip of the index finger
+    // Example: Update the position of the sphere at the tip of the index finger
     const indexFingerTip = landmarks[8];
     const [x, y, z] = indexFingerTip;
 
     // Convert coordinates to Three.js coordinates
-    const sphere = new THREE.Mesh(
-        new THREE.SphereGeometry(0.05, 32, 32),
-        new THREE.MeshBasicMaterial({ color: 0xff0000 })
-    );
-    sphere.position.set(x, -y, z);
+    // Assuming the video is 640x480, we scale the coordinates to fit the Three.js scene
+    const scaleX = window.innerWidth / 640;
+    const scaleY = window.innerHeight / 480;
 
-    // Add the sphere to the scene
-    scene.add(sphere);
+    sphere.position.set((x - 320) * scaleX, -(y - 240) * scaleY, z);
 }
-
-// Initialize Three.js scene
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-camera.position.z = 5;
 
 function animate() {
     requestAnimationFrame(animate);
