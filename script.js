@@ -51,7 +51,7 @@ function initThreeJS() {
 
     // Create a camera
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.z = 5; // Move the camera back to view the scene
+    camera.position.set(0, 0, 10); // Adjust camera position to view the scene
 
     // Create a renderer
     renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -59,10 +59,18 @@ function initThreeJS() {
     document.body.appendChild(renderer.domElement);
 
     // Create a 3D object to highlight the hand
-    const geometry = new THREE.SphereGeometry(0.2, 32, 32); // Larger sphere
+    const geometry = new THREE.SphereGeometry(0.2, 32, 32); // Sphere size
     const material = new THREE.MeshBasicMaterial({ color: 0xff00ff, wireframe: false });
     handObject = new THREE.Mesh(geometry, material);
+    handObject.position.z = 0; // Set initial Z position to 0
     scene.add(handObject);
+
+    // Add a test cube to verify Three.js is working
+    const testGeometry = new THREE.BoxGeometry(1, 1, 1);
+    const testMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const testCube = new THREE.Mesh(testGeometry, testMaterial);
+    testCube.position.set(0, 0, 0); // Position the test cube at the center
+    scene.add(testCube);
 
     // Add lighting (optional, if using materials that require light)
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -120,6 +128,10 @@ function highlightHandIn3D(landmarks) {
     // Update 3D object position
     handObject.position.x = x;
     handObject.position.y = y;
+    handObject.position.z = 0; // Ensure Z position is 0
+
+    // Log sphere position for debugging
+    console.log("Sphere position:", handObject.position);
 
     // Render the scene
     renderer.render(scene, camera);
@@ -132,6 +144,11 @@ async function init() {
     // Set up the webcam (back camera)
     await setupWebcam();
     console.log("Webcam setup complete.");
+
+    // Verify webcam feed is playing
+    video.onplay = () => {
+        console.log("Webcam feed is playing.");
+    };
 
     // Load the Handpose model
     const model = await loadHandposeModel();
