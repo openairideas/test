@@ -127,17 +127,23 @@ function highlightHandIn3D(landmarks) {
 
 // Initialize the project
 async function init() {
+    console.log("Initializing the project...");
+
     // Set up the webcam (back camera)
     await setupWebcam();
+    console.log("Webcam setup complete.");
 
     // Load the Handpose model
     const model = await loadHandposeModel();
+    console.log("Handpose model loaded.");
 
     // Initialize Three.js
     initThreeJS();
+    console.log("Three.js initialized.");
 
     // Start detecting hand gestures
     detectHandGestures(model);
+    console.log("Hand gesture detection started.");
 }
 
 // Run the initialization function
